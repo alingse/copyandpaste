@@ -70,7 +70,7 @@ func processSwitch(fset *token.FileSet, node *ast.SwitchStmt) (ds []analysis.Dia
 			ds = append(ds, analysis.Diagnostic{
 				Pos:      node.Pos(),
 				End:      node.End(),
-				Message:  "dupl body " + body,
+				Message:  "duplicate case body, Is it a copy and paste? " + body,
 				Category: LinterName,
 			})
 		}
