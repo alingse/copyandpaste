@@ -4,7 +4,7 @@ func switchDemo(code string) string {
 	var name string
 
 	switch code {
-	case "1":
+	case "1", "2":
 		name = "answer"
 	case "2":
 		name = "answer"

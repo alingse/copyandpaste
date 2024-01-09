@@ -2,7 +2,6 @@ package copyandpaste
 
 import (
 	"bytes"
-	"fmt"
 	"go/ast"
 	"go/printer"
 	"go/token"
@@ -63,11 +62,11 @@ func (a *analyzer) AsCheckVisitor(pass *analysis.Pass) func(ast.Node) {
 }
 
 func processSwitch(fset *token.FileSet, node *ast.SwitchStmt) (ds []analysis.Diagnostic) {
-	var sameBody = map[string]int{}
+	var caseBodyMap = map[string]int{}
 	for i, c := range node.Body.List {
 		cc := c.(*ast.CaseClause)
 		body := getCaseBody(fset, cc.Body)
-		if _, ok := sameBody[body]; body != "" && ok {
+		if _, ok := caseBodyMap[body]; body != "" && ok {
 			ds = append(ds, analysis.Diagnostic{
 				Pos:      node.Pos(),
 				End:      node.End(),
@@ -75,7 +74,7 @@ func processSwitch(fset *token.FileSet, node *ast.SwitchStmt) (ds []analysis.Dia
 				Category: LinterName,
 			})
 		}
-		sameBody[body] = i
+		caseBodyMap[body] = i
 	}
 	return ds
 }
@@ -88,14 +87,5 @@ func getCaseBody(fset *token.FileSet, body []ast.Stmt) string {
 			return ""
 		}
 	}
-	return string(buf.Bytes())
-}
-
-func getFuncName(fset *token.FileSet, caller *ast.CallExpr) (string, error) {
-	buf := new(bytes.Buffer)
-	if err := printer.Fprint(buf, fset, caller.Fun); err != nil {
-		return "", fmt.Errorf("unable to print node at %s: %w", fset.Position(caller.Fun.Pos()), err)
-	}
-
-	return buf.String(), nil
+	return buf.String()
 }
