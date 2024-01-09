@@ -66,6 +66,10 @@ func processSwitch(fset *token.FileSet, node *ast.SwitchStmt) (ds []analysis.Dia
 	var caseBodyMap = map[string]string{}
 	for _, c := range node.Body.List {
 		cc := c.(*ast.CaseClause)
+		// default branch
+		if len(cc.List) == 0 {
+			continue
+		}
 		expr := getCaseCode(fset, cc.List)
 		body := getCaseBody(fset, cc.Body)
 		if lastExpr, ok := caseBodyMap[body]; body != "" && ok {
