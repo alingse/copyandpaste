@@ -1,6 +1,6 @@
 module github.com/alingse/copyandpaste
 
-go 1.21.4
+go 1.21
 
 require golang.org/x/tools v0.16.1
 
