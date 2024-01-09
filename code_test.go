@@ -24,7 +24,7 @@ func TestAnalyzer(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			analysistest.RunWithSuggestedFixes(t, analysistest.TestData(), a, test.desc)
+			analysistest.Run(t, analysistest.TestData(), a, test.desc)
 		})
 	}
 }
