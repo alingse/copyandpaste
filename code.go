@@ -70,8 +70,12 @@ func processSwitch(fset *token.FileSet, node *ast.SwitchStmt) (ds []analysis.Dia
 		if len(cc.List) == 0 {
 			continue
 		}
-		expr := getCaseCode(fset, cc.List)
-		body := getCaseBody(fset, cc.Body)
+		// return/break
+		if isIgnoreCaseBody(cc.Body) {
+			continue
+		}
+		expr := reprCaseCode(fset, cc.List)
+		body := reprCaseBody(fset, cc.Body)
 		if lastExpr, ok := caseBodyMap[body]; body != "" && ok {
 			ds = append(ds, analysis.Diagnostic{
 				Pos:      cc.Case,
@@ -86,7 +90,21 @@ func processSwitch(fset *token.FileSet, node *ast.SwitchStmt) (ds []analysis.Dia
 	return ds
 }
 
-func getCaseCode(fset *token.FileSet, list []ast.Expr) string {
+func isIgnoreCaseBody(body []ast.Stmt) bool {
+	if len(body) == 0 {
+		return true
+	}
+	if len(body) > 1 {
+		return false
+	}
+	switch body[0].(type) {
+	case *ast.ReturnStmt, *ast.BranchStmt:
+		return true
+	}
+	return false
+}
+
+func reprCaseCode(fset *token.FileSet, list []ast.Expr) string {
 	buf := new(bytes.Buffer)
 	buf.WriteString("case ")
 	length := len(list) - 1
@@ -103,7 +121,7 @@ func getCaseCode(fset *token.FileSet, list []ast.Expr) string {
 	return buf.String()
 }
 
-func getCaseBody(fset *token.FileSet, body []ast.Stmt) string {
+func reprCaseBody(fset *token.FileSet, body []ast.Stmt) string {
 	buf := new(bytes.Buffer)
 	for _, b := range body {
 		if err := printer.Fprint(buf, fset, b); err != nil {
