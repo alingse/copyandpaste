@@ -70,8 +70,8 @@ func processSwitch(fset *token.FileSet, node *ast.SwitchStmt) (ds []analysis.Dia
 		body := getCaseBody(fset, cc.Body)
 		if lastExpr, ok := caseBodyMap[body]; body != "" && ok {
 			ds = append(ds, analysis.Diagnostic{
-				Pos:      node.Pos(),
-				End:      node.End(),
+				Pos:      cc.Case,
+				End:      cc.End(),
 				Message:  fmt.Sprintf("Duplicate case body found for %s and %s Is it a copy and paste?", expr, lastExpr),
 				Category: LinterName,
 			})
