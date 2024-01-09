@@ -2,6 +2,7 @@ package copyandpaste
 
 import (
 	"bytes"
+	"fmt"
 	"go/ast"
 	"go/printer"
 	"go/token"
@@ -62,21 +63,40 @@ func (a *analyzer) AsCheckVisitor(pass *analysis.Pass) func(ast.Node) {
 }
 
 func processSwitch(fset *token.FileSet, node *ast.SwitchStmt) (ds []analysis.Diagnostic) {
-	var caseBodyMap = map[string]int{}
-	for i, c := range node.Body.List {
+	var caseBodyMap = map[string]string{}
+	for _, c := range node.Body.List {
 		cc := c.(*ast.CaseClause)
+		expr := getCaseCode(fset, cc.List)
 		body := getCaseBody(fset, cc.Body)
-		if _, ok := caseBodyMap[body]; body != "" && ok {
+		if lastExpr, ok := caseBodyMap[body]; body != "" && ok {
 			ds = append(ds, analysis.Diagnostic{
 				Pos:      node.Pos(),
 				End:      node.End(),
-				Message:  "duplicate case body, Is it a copy and paste? " + body,
+				Message:  fmt.Sprintf("Duplicate case body found for %s and %s Is it a copy and paste?", expr, lastExpr),
 				Category: LinterName,
 			})
+			continue
 		}
-		caseBodyMap[body] = i
+		caseBodyMap[body] = expr
 	}
 	return ds
+}
+
+func getCaseCode(fset *token.FileSet, list []ast.Expr) string {
+	buf := new(bytes.Buffer)
+	buf.WriteString("case ")
+	length := len(list) - 1
+	for i, b := range list {
+		if err := printer.Fprint(buf, fset, b); err != nil {
+			log.Println(err)
+			return ""
+		}
+		if i < length {
+			buf.WriteString(",")
+		}
+	}
+	buf.WriteString(":")
+	return buf.String()
 }
 
 func getCaseBody(fset *token.FileSet, body []ast.Stmt) string {
