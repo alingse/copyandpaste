@@ -1,5 +1,5 @@
 name: run-repo
-run-name: "run `nilnesserr` for ${{github.event.inputs.repo_url}}"
+run-name: "run for ${{github.event.inputs.repo_url}}"
 
 on:
   workflow_dispatch:
