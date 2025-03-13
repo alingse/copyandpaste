@@ -10,7 +10,12 @@ func TestAnalyzer(t *testing.T) {
 	testCases := []struct {
 		desc     string
 		settings LinterSetting
-	}{}
+	}{
+		{
+			desc:     "repeatoptions",
+			settings: LinterSetting{},
+		},
+	}
 
 	for _, test := range testCases {
 		t.Run(test.desc, func(t *testing.T) {
