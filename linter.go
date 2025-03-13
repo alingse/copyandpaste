@@ -12,6 +12,9 @@ import (
 
 const (
 	LinterName = "copyandpaste"
+
+	repeatArgsMessage   = "the args should be different"
+	repeatOptionMessage = "repeat option"
 )
 
 type LinterSetting struct{}
