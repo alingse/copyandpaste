@@ -1,0 +1,41 @@
+name: submit-repos
+run-name: "Submit ${{inputs.count}} repos for ${{ inputs.workflow }} from ${{ inputs.source }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      source:
+        description: |
+          can be 'top.txt' or  'awesome.txt' or some 'https://xxx' download link
+          Default 'top.txt'
+        default: "top.txt"
+      count:
+        description: |
+          total submit repo count
+          Default '1000'
+        default: "1000"
+      workflow:
+        description: |
+          the workflow to submit with each repo
+          Default 'go-linter-runner.yml'
+        default: "go-linter-runner.yml"
+
+permissions:
+  actions: write
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Run go-linter-runner to submit repos
+        uses: alingse/go-linter-runner@main
+        with:
+          action: submit
+          submit_source_file: ${{ inputs.source }}
+          submit_repo_count: ${{ inputs.count }}
+          submit_workflow: ${{ inputs.workflow }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
