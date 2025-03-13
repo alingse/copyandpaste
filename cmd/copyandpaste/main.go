@@ -9,9 +9,11 @@ import (
 
 func main() {
 	setting := copyandpaste.LinterSetting{}
+
 	analyzer, err := copyandpaste.NewAnalyzer(setting)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	singlechecker.Main(analyzer)
 }
