@@ -8,8 +8,8 @@ import (
 	"golang.org/x/tools/go/analysis"
 )
 
-func (a *analyzer) checkRepeatOptions(pass *analysis.Pass, n ast.Node) {
-	switch node := n.(type) {
+func (a *analyzer) checkRepeatOptions(pass *analysis.Pass, node ast.Node) {
+	switch node := node.(type) {
 	case *ast.CallExpr:
 		a.repeatOptionsCallExpr(pass, node)
 	case *ast.CompositeLit:
@@ -54,6 +54,7 @@ func (a *analyzer) reportRepeatArgs(pass *analysis.Pass, args []ast.Expr, messag
 		if code == "" {
 			continue
 		}
+
 		if !repeatArgs[code] {
 			repeatArgs[code] = true
 

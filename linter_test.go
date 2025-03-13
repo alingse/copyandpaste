@@ -1,29 +1,34 @@
-package copyandpaste
+package copyandpaste_test
 
 import (
 	"testing"
 
+	"github.com/alingse/copyandpaste"
 	"golang.org/x/tools/go/analysis/analysistest"
 )
 
 func TestAnalyzer(t *testing.T) {
+	t.Parallel()
+
 	testCases := []struct {
 		desc     string
-		settings LinterSetting
+		settings copyandpaste.LinterSetting
 	}{
 		{
 			desc:     "repeatoptions",
-			settings: LinterSetting{},
+			settings: copyandpaste.LinterSetting{},
 		},
 		{
 			desc:     "repeatargs",
-			settings: LinterSetting{},
+			settings: copyandpaste.LinterSetting{},
 		},
 	}
 
 	for _, test := range testCases {
 		t.Run(test.desc, func(t *testing.T) {
-			a, err := NewAnalyzer(test.settings)
+			t.Parallel()
+
+			a, err := copyandpaste.NewAnalyzer(test.settings)
 			if err != nil {
 				t.Fatal(err)
 			}

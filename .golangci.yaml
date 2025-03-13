@@ -1,0 +1,28 @@
+linters:
+  enable-all: true
+  disable:
+    - varnamelen
+    - nilnil
+    - ireturn
+    - gochecknoglobals
+
+linters-settings:
+  depguard:
+    rules:
+      main:
+        list-mode: lax
+        files:
+          - $all
+        allow:
+          - $gostd
+          - github.com/alingse/copyandpaste
+
+issues:
+  exclude-rules:
+    - text: "analysis."
+      linters:
+        - exhaustruct
+
+    - text: "newAnalyzer"
+      linters:
+        - unparam

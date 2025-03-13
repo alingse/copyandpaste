@@ -14,18 +14,18 @@ var noRepeatFuncs = map[string]bool{
 	"strings.EqualFold": true,
 }
 
-func (a *analyzer) checkRepeatArgs(pass *analysis.Pass, n ast.Node) {
-	node, ok := n.(*ast.CallExpr)
+func (a *analyzer) checkRepeatArgs(pass *analysis.Pass, node ast.Node) {
+	call, ok := node.(*ast.CallExpr)
 	if !ok {
 		return
 	}
 
-	if len(node.Args) <= 1 {
+	if len(call.Args) <= 1 {
 		return
 	}
 
-	funName := a.getExprCode(pass, node.Fun)
+	funName := a.getExprCode(pass, call.Fun)
 	if noRepeatFuncs[funName] {
-		a.reportRepeatArgs(pass, node.Args, repeatArgsMessage)
+		a.reportRepeatArgs(pass, call.Args, repeatArgsMessage)
 	}
 }
