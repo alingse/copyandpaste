@@ -2,6 +2,7 @@ package copyandpaste
 
 import (
 	"bytes"
+	"errors"
 	"go/ast"
 	"go/printer"
 
@@ -47,17 +48,23 @@ func newAnalyzer(setting LinterSetting) (*analyzer, error) {
 	return a, nil
 }
 
-func (a *analyzer) run(pass *analysis.Pass) (interface{}, error) {
-	inspectorInfo := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
+var ErrInspectorInfo = errors.New("invalid inspector info")
+
+func (a *analyzer) run(pass *analysis.Pass) (any, error) {
+	inspectorInfo, ok := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
+	if !ok {
+		return nil, ErrInspectorInfo
+	}
+
 	inspectorInfo.Preorder(nil, a.visit(pass))
 
 	return nil, nil
 }
 
 func (a *analyzer) visit(pass *analysis.Pass) func(ast.Node) {
-	return func(n ast.Node) {
-		a.checkRepeatOptions(pass, n)
-		a.checkRepeatArgs(pass, n)
+	return func(node ast.Node) {
+		a.checkRepeatOptions(pass, node)
+		a.checkRepeatArgs(pass, node)
 	}
 }
 
