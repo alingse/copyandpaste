@@ -8,10 +8,6 @@ import (
 	"golang.org/x/tools/go/analysis"
 )
 
-const (
-	repeatOption = "repeat options"
-)
-
 func (a *analyzer) checkRepeatOptions(pass *analysis.Pass, n ast.Node) {
 	switch node := n.(type) {
 	case *ast.CallExpr:
@@ -31,7 +27,7 @@ func (a *analyzer) repeatOptionsCallExpr(pass *analysis.Pass, n *ast.CallExpr) {
 		return
 	}
 
-	a.reportRepeatArgs(pass, args)
+	a.reportRepeatArgs(pass, args, repeatOptionMessage)
 }
 
 func (a *analyzer) repeatOptionsCompositeLit(pass *analysis.Pass, n *ast.CompositeLit) {
@@ -47,14 +43,17 @@ func (a *analyzer) repeatOptionsCompositeLit(pass *analysis.Pass, n *ast.Composi
 		return
 	}
 
-	a.reportRepeatArgs(pass, n.Elts)
+	a.reportRepeatArgs(pass, n.Elts, repeatOptionMessage)
 }
 
-func (a *analyzer) reportRepeatArgs(pass *analysis.Pass, args []ast.Expr) {
+func (a *analyzer) reportRepeatArgs(pass *analysis.Pass, args []ast.Expr, message string) {
 	repeatArgs := make(map[string]bool)
 
 	for _, arg := range args {
 		code := a.getExprCode(pass, arg)
+		if code == "" {
+			continue
+		}
 		if !repeatArgs[code] {
 			repeatArgs[code] = true
 
@@ -64,7 +63,7 @@ func (a *analyzer) reportRepeatArgs(pass *analysis.Pass, args []ast.Expr) {
 		pass.Report(analysis.Diagnostic{
 			Pos:     arg.Pos(),
 			End:     arg.End(),
-			Message: repeatOption,
+			Message: message,
 		})
 	}
 }

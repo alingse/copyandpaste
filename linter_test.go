@@ -15,6 +15,10 @@ func TestAnalyzer(t *testing.T) {
 			desc:     "repeatoptions",
 			settings: LinterSetting{},
 		},
+		{
+			desc:     "repeatargs",
+			settings: LinterSetting{},
+		},
 	}
 
 	for _, test := range testCases {
