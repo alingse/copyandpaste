@@ -79,7 +79,10 @@ func (a *analyzer) getVariadicArgs(pass *analysis.Pass, n *ast.CallExpr) []ast.E
 		return nil
 	}
 
-	fnType := pass.TypesInfo.TypeOf(n.Fun).Underlying()
+	fnType := pass.TypesInfo.TypeOf(n.Fun)
+	if _, ok := fnType.(*types.Named); ok {
+		return nil
+	}
 
 	fnSign, ok := fnType.(*types.Signature)
 	if !ok {
