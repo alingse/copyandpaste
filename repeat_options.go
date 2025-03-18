@@ -79,7 +79,7 @@ func (a *analyzer) getVariadicArgs(pass *analysis.Pass, n *ast.CallExpr) []ast.E
 		return nil
 	}
 
-	fnType := pass.TypesInfo.TypeOf(n.Fun)
+	fnType := pass.TypesInfo.TypeOf(n.Fun).Underlying()
 
 	fnSign, ok := fnType.(*types.Signature)
 	if !ok {
@@ -94,9 +94,9 @@ func (a *analyzer) getVariadicArgs(pass *analysis.Pass, n *ast.CallExpr) []ast.E
 }
 
 func (a *analyzer) isOptionType(pass *analysis.Pass, e ast.Expr) bool {
-	typeInfo := pass.TypesInfo.TypeOf(e)
-
+	typeInfo := pass.TypesInfo.TypeOf(e).Underlying()
 	fnSign, ok := typeInfo.(*types.Signature)
+
 	if !ok {
 		return false
 	}

@@ -1,5 +1,9 @@
 package repeatoptions
 
+import (
+	"context"
+)
+
 type Cfg struct {
 	name   string
 	width  int
@@ -8,11 +12,14 @@ type Cfg struct {
 
 func NewCfg(name string, opts ...func(c *Cfg)) *Cfg {
 	cfg := &Cfg{
-		name: name,
+		name:   name,
+		width:  0,
+		height: 0,
 	}
 	for _, opt := range opts {
 		opt(cfg)
 	}
+
 	return cfg
 }
 
@@ -46,4 +53,19 @@ func Demo(w, h int) {
 		WithHeight(h),
 		WithWidth(w), // want `repeat option`
 	)
+
+	Export(context.Background(), nil, WithImage(nil, ""), WithImage(nil, "")) // want `repeat option`
+}
+
+type exportOptions struct{}
+
+type ExportOpt func(context.Context, *exportOptions) error
+
+func WithImage(_ any, _ string) ExportOpt {
+	return func(_ context.Context, _ *exportOptions) error {
+		return nil
+	}
+}
+
+func Export(_ context.Context, _ any, _ ...ExportOpt) {
 }
