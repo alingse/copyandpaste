@@ -7,11 +7,21 @@ import (
 )
 
 var noRepeatFuncs = map[string]bool{
+	"bytes.Compare":     true,
+	"bytes.Equal":       true,
+	"bytes.Index":       true,
+	"cmp.Compare":       true,
+	"maps.Equal":        true,
+	"math.Dim":          true,
 	"math.Max":          true,
 	"math.Min":          true,
+	"os.Rename":         true,
+	"reflect.DeepEqual": true,
+	"slices.Compare":    true,
 	"slices.Equal":      true,
-	"maps.Equal":        true,
+	"strings.Compare":   true,
 	"strings.EqualFold": true,
+	"strings.Index":     true,
 }
 
 func (a *analyzer) checkRepeatArgs(pass *analysis.Pass, node ast.Node) {
