@@ -40,6 +40,10 @@ func (a *analyzer) repeatOptionsCompositeLit(pass *analysis.Pass, n *ast.Composi
 		return
 	}
 
+	if arrayType.Len != nil {
+		return
+	}
+
 	eltType := pass.TypesInfo.TypeOf(arrayType.Elt)
 	argType := pass.TypesInfo.TypeOf(n.Elts[0])
 

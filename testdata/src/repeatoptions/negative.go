@@ -31,4 +31,9 @@ func Negative3() {
 		nil,
 		nil,
 	}
+
+	_ = [2]func(_, _ any){
+		func(_, _ any) {},
+		func(_, _ any) {},
+	}
 }
