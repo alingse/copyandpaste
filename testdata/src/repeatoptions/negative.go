@@ -16,3 +16,19 @@ func Negative2() {
 
 	_ = f(nil, nil)
 }
+
+func DoAny(_ ...any) {
+
+}
+
+func Negative3() {
+	DoAny(WithWidth(1), WithHeight(1), WithWidth(1))
+
+	_ = []any{WithWidth(1), WithHeight(1), WithWidth(1)}
+
+	_ = []func(c *Cfg){
+		WithWidth(1),
+		nil,
+		nil,
+	}
+}
