@@ -18,12 +18,12 @@ func (a *analyzer) checkRepeatOptions(pass *analysis.Pass, node ast.Node) {
 }
 
 func (a *analyzer) repeatOptionsCallExpr(pass *analysis.Pass, n *ast.CallExpr) {
-	args := a.getVariadicArgs(pass, n)
+	args, argType := a.getVariadicArgs(pass, n)
 	if len(args) == 0 {
 		return
 	}
 
-	if !a.isOptionType(pass, args[0]) {
+	if !a.isOptionType(argType) {
 		return
 	}
 
@@ -31,15 +31,23 @@ func (a *analyzer) repeatOptionsCallExpr(pass *analysis.Pass, n *ast.CallExpr) {
 }
 
 func (a *analyzer) repeatOptionsCompositeLit(pass *analysis.Pass, n *ast.CompositeLit) {
-	if _, ok := n.Type.(*ast.ArrayType); !ok {
-		return
-	}
-
 	if len(n.Elts) == 0 {
 		return
 	}
 
-	if !a.isOptionType(pass, n.Elts[0]) {
+	arrayType, ok := n.Type.(*ast.ArrayType)
+	if !ok {
+		return
+	}
+
+	if arrayType.Len != nil {
+		return
+	}
+
+	eltType := pass.TypesInfo.TypeOf(arrayType.Elt)
+	argType := pass.TypesInfo.TypeOf(n.Elts[0])
+
+	if !a.isOptionType(eltType) || !a.isOptionType(argType) {
 		return
 	}
 
@@ -51,7 +59,7 @@ func (a *analyzer) reportRepeatArgs(pass *analysis.Pass, args []ast.Expr, messag
 
 	for _, arg := range args {
 		code := a.getExprCode(pass, arg)
-		if code == "" {
+		if code == "" || code == "nil" {
 			continue
 		}
 
@@ -69,35 +77,45 @@ func (a *analyzer) reportRepeatArgs(pass *analysis.Pass, args []ast.Expr, messag
 	}
 }
 
-func (a *analyzer) getVariadicArgs(pass *analysis.Pass, n *ast.CallExpr) []ast.Expr {
+func (a *analyzer) getVariadicArgs(pass *analysis.Pass, n *ast.CallExpr) ([]ast.Expr, types.Type) {
 	// skip `func(a...)`
 	if n.Ellipsis != token.NoPos {
-		return nil
+		return nil, nil
 	}
 
 	if len(n.Args) == 0 {
-		return nil
+		return nil, nil
 	}
 
 	fnType := pass.TypesInfo.TypeOf(n.Fun)
 	if _, ok := fnType.(*types.Named); ok {
-		return nil
+		return nil, nil
 	}
 
 	fnSign, ok := fnType.(*types.Signature)
 	if !ok {
-		return nil
+		return nil, nil
 	}
 
 	if !fnSign.Variadic() {
-		return nil
+		return nil, nil
 	}
 
-	return n.Args[fnSign.Params().Len()-1:]
+	last := fnSign.Params().Len() - 1
+	typeInfo := fnSign.Params().At(last).Type()
+
+	sliceType, ok := typeInfo.(*types.Slice)
+	if !ok {
+		return nil, nil
+	}
+
+	argType := sliceType.Elem()
+
+	return n.Args[last:], argType
 }
 
-func (a *analyzer) isOptionType(pass *analysis.Pass, e ast.Expr) bool {
-	typeInfo := pass.TypesInfo.TypeOf(e).Underlying()
+func (a *analyzer) isOptionType(typeInfo types.Type) bool {
+	typeInfo = typeInfo.Underlying()
 	fnSign, ok := typeInfo.(*types.Signature)
 
 	if !ok {
